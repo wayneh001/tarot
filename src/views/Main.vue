@@ -1,31 +1,104 @@
 <script setup>
-import {onMounted, ref} from 'vue';
-import CModal from '../components/CModal.vue';
+import {ref} from 'vue';
 
 // Mark: Properties
-const modal = ref();
+let pickCount = ref(1);
 let cards = ref([]);
+let pickedCardsSave = ref([]);
+let randomGeneratedCards = ref([])
+let cardIsShowed = ref(false);
+let resultIsShowed = ref(false);
 
 // Mark: Function
-function flop() {
-  modal.value?.toShowModal();
+function toPick(card) {
+  if (pickedCardsSave.value.length <= pickCount.value) {
+    const divElement = document.getElementById(`tarot-card-${card}`)
+    if (pickedCardsSave.value.indexOf(card) > -1) {
+      pickedCardsSave.value.splice(pickedCardsSave.value.indexOf(card), 1);
+      divElement.style.opacity = "100%";
+    } else {
+      if (pickedCardsSave.value.length < pickCount.value) {
+        pickedCardsSave.value.push(card);
+        divElement.style.opacity = "50%";
+      }
+    }
+  }
+}
+
+function restart() {
+  cardIsShowed.value = false;
+  resultIsShowed.value = false;
+  pickCount.value = 1;
+  pickedCardsSave.value = [];
+}
+
+function randomInteger(min, max) {
+  return Math.floor(min + Math.random() * (max + 1 - min));
+}
+
+function showResult() {
+  while (true) {
+    let isExists = false;
+    let random = randomInteger(1, 60)
+    for (let i = 0; i < randomGeneratedCards.value.length; i++) {
+      if (random === randomGeneratedCards[i]) {
+        isExists = true;
+        break;
+      }
+    }
+    if (!isExists) randomGeneratedCards.value.push(random);
+    if (randomGeneratedCards.value.length === pickedCardsSave.value.length) break;
+  }
+  resultIsShowed.value = true;
+  cardIsShowed.value = false;
 }
 
 setInterval(() => {
   if (cards.value.length < 60) {
     cards.value.push(cards.value.length + 1);
   }
-}, 100);
+}, 0);
 </script>
 
 <template>
   <div class="container-xxl p-5">
-    <transition-group name="card" class="row row-cols-12 g-2 list p-0" tag="ul">
-      <li v-for="card in cards" :key="card" class="col" @click.prevent="flop()">
-        <div class="p-2 bg-danger-subtle pointer tarot-card"/>
-      </li>
-    </transition-group>
-    <c-modal ref="modal"/>
+    <div v-show="cardIsShowed === false && resultIsShowed === false" class="bg-light mb-3 p-3">
+      <h3 class="my-3 text-center">請選擇測算的卡片數量</h3>
+      <div class="d-flex justify-content-center align-items-center w-100 p-3">
+        <div v-for="n in 5" :key="n" class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" :id="`inlineRadio1n-${n}`" :value="n"
+                 v-model="pickCount">
+          <label class="form-check-label" :for="`inlineRadio1-${n}`">{{ n }}</label>
+        </div>
+      </div>
+      <div class="d-flex justify-content-center align-items-center w-100 p-3">
+        <button type="button" class="btn btn-primary w-100 w-md-25" @click.prevent="cardIsShowed = true">開始測算</button>
+      </div>
+    </div>
+    <div v-if="cardIsShowed && pickedCardsSave.length <= pickCount">
+      <ul class="row row-cols-3 row-cols-md-6 g-2 list p-0">
+        <li v-for="card in cards" :key="card" class="col" @click.prevent="toPick(card)">
+          <div class="pointer tarot-card" :id="`tarot-card-${card}`">
+            <img src="../../public/images/cover.jpg" class="image-style" alt="">
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div v-if="resultIsShowed">
+      <ul class="row row-cols-1 row-cols-md-6 g-2 list p-0">
+        <li v-for="card in randomGeneratedCards" :key="card" class="d-flex justify-content-center col">
+          <div class="tarot-card-selected" :id="`tarot-card-selected-${card}`">
+            <img :src="`../../public/images/${card}.jpg`" class="image-style" :alt="card">
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div v-if="pickedCardsSave.length === pickCount" class="bg-light mb-3 p-3">
+      <div class="d-md-flex justify-content-md-center align-items-md-center w-100 w-md-50 p-3">
+        <button type="button" class="btn btn-primary w-100 mb-3 mb-md-0 me-md-3" :class="{disabled: resultIsShowed === true}" @click.prevent="showResult()">查看結果</button>
+        <button type="button" class="btn btn-success w-100" @click.prevent="restart()">重新開始</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -34,30 +107,25 @@ li {
   list-style: none;
 }
 
-.row-cols-12 > * {
-  flex: 0 0 auto;
-  width: 8.33333334%;
+.tarot-card, tarot-card-selected {
+  aspect-ratio: 0.64;
+  border-radius: 0.1rem;
+  box-shadow: 0 0 0.2rem rgba(0, 0, 0, 0.5);
 }
 
-.card-enter-active {
-  opacity: 0;
-  transform: translateX(100%);
+.tarot-card:hover {
+  transform: scale(1.2);
+  transition: all 0.1s ease-out;
 }
 
-.card-enter-to {
-  opacity: 1;
-  transform: translateX(0);
-  transition: all 0.4s;
+.pointer {
+  cursor: pointer;
 }
 
-.card-enter-active {
-  opacity: 0;
-  transform: translateX(100%);
+.image-style {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.card-enter-to {
-  opacity: 1;
-  transform: translateX(0);
-  transition: all 0.4s;
-}
 </style>
