@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^6.3.5"
+    "vite": "7.1.11"
   },
   "dependencies": {
     "@vitejs/plugin-legacy": "^6.1.1",

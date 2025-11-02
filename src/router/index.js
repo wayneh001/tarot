@@ -6,13 +6,8 @@ let router = createRouter({
         {
             path: '/',
             name: 'App',
-            component: () => import('../views/Landing.vue')
-        },
-        {
-            path: '/main',
-            name: 'Main',
             component: () => import('../views/Main.vue')
-        }
+        },
     ]
 });
 
