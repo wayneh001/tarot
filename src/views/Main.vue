@@ -53,6 +53,10 @@ function showResult() {
   cardIsShowed.value = false;
 }
 
+function toReturnSrcPath(card) {
+  return new URL(`../public/img/${card}.jpg`, import.meta.url).href;
+}
+
 setInterval(() => {
   if (cards.value.length < 60) {
     cards.value.push(cards.value.length + 1);
@@ -79,7 +83,7 @@ setInterval(() => {
       <ul class="row row-cols-3 row-cols-md-6 g-2 list p-0">
         <li v-for="card in cards" :key="card" class="col" @click.prevent="toPick(card)">
           <div class="pointer tarot-card" :id="`tarot-card-${card}`">
-            <img src="../../public/images/cover.jpg" class="image-style" alt="">
+            <img src="../public/img/cover.jpg" class="image-style" alt="">
           </div>
         </li>
       </ul>
@@ -88,7 +92,7 @@ setInterval(() => {
       <ul class="row row-cols-1 row-cols-md-6 g-2 list p-0">
         <li v-for="card in randomGeneratedCards" :key="card" class="d-flex justify-content-center col">
           <div class="tarot-card-selected" :id="`tarot-card-selected-${card}`">
-            <img :src="`../../public/images/${card}.jpg`" class="image-style" :alt="card">
+            <img :src="toReturnSrcPath(card)" class="image-style" :alt="card">
           </div>
         </li>
       </ul>
